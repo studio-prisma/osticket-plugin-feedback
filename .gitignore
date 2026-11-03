@@ -1,0 +1,31 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Backup / temp
+*.bak
+*.tmp
+*.log
+*~
+
+# Build output
+dist/
+*.zip
+
+# Local-only
+local/
+private/
+
+# E2E
+node_modules/
+
+# Test stacks: credentials, seed output, reports (dev/up.sh)
+dev/local/
+dev/local-*/
