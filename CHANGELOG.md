@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-08
+
+### Added
+
+- **Tick "Send satisfaction question"** in the agent panel's reply form, note form and status dialog, shown when a closing status is chosen and the ticket would be asked. Removing it means: never ask this ticket (row state `declined`, internal note).
+- **"No satisfaction question" / "Allow satisfaction question again"** in the ticket's More menu, before closing. POST to `scp/ajax.php/feedback/ticket/<id>/decline|allow` with osTicket's CSRF token and the agent's ticket permission.
+- **Setting "Closing without an agent form"** for API, cron and mass status changes in the ticket list: ask (default, as in 0.1), only when the request asks for it, or never. Requests pass `feedback_ask=1|0`; API Endpoints 2.9.0 forwards its `feedback` field.
+- **Setting "Agents can switch the question off"** (default on).
+- The note after a sent question names what triggered it (agent panel, ticket list, API or cron).
+
 ## [0.1.1] - 2026-11-08
 
 ### Added
@@ -35,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Retention: rows are deleted after 24 months; the IP is stored only as a keyed hash.
 - Mail in the style of a brand line over an accent rule, buttons as table cells, a grey footer with an AI notice; texts editable, German (informal) and English built in.
 
-[Unreleased]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/studio-prisma/osticket-plugin-feedback/releases/tag/v0.1.0
