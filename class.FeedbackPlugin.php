@@ -42,7 +42,7 @@ require_once __DIR__ . '/src/FeedbackUi.php';
 class FeedbackPlugin extends Plugin
 {
     /** Mirrors plugin.php. */
-    public const VERSION = '0.2.0';
+    public const VERSION = '0.2.1';
 
     /** Route bases, relative to the help desk root. */
     public const CLIENT_BASE = 'ajax.php/feedback';

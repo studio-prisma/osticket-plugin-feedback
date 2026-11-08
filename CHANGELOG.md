@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-08
+
+### Fixed
+
+- The tick and the More-menu entry were missing when the ticket view was opened by number (`scp/tickets.php?number=…`); the plugin now finds the ticket the way osTicket does, by ID or by number.
+
 ## [0.2.0] - 2026-11-08
 
 ### Added
@@ -45,7 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Retention: rows are deleted after 24 months; the IP is stored only as a keyed hash.
 - Mail in the style of a brand line over an accent rule, buttons as table cells, a grey footer with an AI notice; texts editable, German (informal) and English built in.
 
-[Unreleased]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/studio-prisma/osticket-plugin-feedback/releases/tag/v0.1.0

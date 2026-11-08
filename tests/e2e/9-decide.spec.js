@@ -150,6 +150,16 @@ test('UI: status dialog carries the tick; removing it closes without a question'
   expect(errors).toEqual([]);
 });
 
+test('UI: also on a view opened by ticket number (tickets.php?number=)', async ({ page }) => {
+  const id = newTicket('0.2.1 ui number');
+  reply(id, 'admin', 'Antwort.');
+  const num = sql(`SELECT number FROM ost_ticket WHERE ticket_id=${id}`);
+  await staffLogin(page, 'admin');
+  await page.goto(`/scp/tickets.php?number=${num}`);
+  await expect(page.locator('form#reply .spf-ask')).toHaveCount(1);
+  await expect(page.locator('#action-dropdown-more li.spf-menu')).toHaveCount(1);
+});
+
 test('UI: no tick and no menu entry where the rules never ask (Alerts)', async ({ page }) => {
   const id = newTicket('0.2 ui alert', { dept: seed.depts.alerts });
   reply(id, 'admin', 'Gesehen.');
