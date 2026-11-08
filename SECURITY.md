@@ -42,6 +42,7 @@ Expected response: an acknowledgement within 7 days, an assessment within 30. Th
 These are documented design decisions, not findings:
 
 - **Anyone who has the mail can rate.** The link is the authorisation, like a password-reset link. A forwarded mail lets the recipient rate and change the rating while it's valid.
+- **Agents with the "with the mail" note can rate.** That setting copies the sent mail, links included, into an internal note. Every agent who can open the ticket can follow them. The default note has no links.
 - **A link scanner that runs JavaScript** submits the rating like a person would. The confirmation step stops scanners that only fetch the page; one that executes the page in a sandbox is indistinguishable from a click.
 - **Rate limit per IP** counts all customers behind one NAT together (60 requests per 10 minutes, about 20 ratings).
 - **No revocation of single links** other than switching the plugin off (all links) or deleting the row in `<prefix>feedback_request`.

@@ -133,6 +133,36 @@ final class FeedbackMail
         return $out;
     }
 
+    /**
+     * The internal note after a sent question. "full" appends the mail as
+     * sent, links included. Characters beyond U+FFFF (the thumbs emojis, as
+     * entity or literal) are removed: osTicket decodes entities before saving
+     * and the 3-byte utf8 connection would drop them; the buttons keep their
+     * words ("Gut", "Nicht gut").
+     *
+     * @param array<string,mixed>  $s FeedbackSettings::get()
+     * @param array<string,string> $t FeedbackI18n::strings()
+     */
+    public static function sentNote(array $s, array $t, string $to, int $expires, string $subject, string $body): string
+    {
+        $scale = $t['scale_' . $s['scale']] ?? $s['scale'];
+        $html = self::e(sprintf($t['note_sent'], $to, $scale, date($t['date_format'], $expires)));
+        if ($s['note_sent'] === FeedbackSettings::NOTE_FULL) {
+            $html .= '<br><br>' . self::e(sprintf($t['note_mail'], $subject)) . '<hr>' . self::noBeyondBmp($body);
+        }
+        return $html;
+    }
+
+    /** Removes characters beyond U+FFFF, literal or as numeric entity, and the space after an entity. */
+    public static function noBeyondBmp(string $html): string
+    {
+        $html = (string) preg_replace_callback('/&#(x[0-9a-f]{1,8}|[0-9]{1,10});\s?/i', static function (array $m): string {
+            $n = ($m[1][0] === 'x' || $m[1][0] === 'X') ? hexdec(substr($m[1], 1)) : (int) $m[1];
+            return $n > 0xFFFF ? '' : $m[0];
+        }, $html);
+        return (string) preg_replace('/[\x{10000}-\x{10FFFF}]\s?/u', '', $html);
+    }
+
     /** A subject line never carries a line break (header injection) or markup. */
     public static function oneLine(string $s): string
     {

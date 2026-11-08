@@ -57,8 +57,8 @@ check('config: spec defaults (mail, thumbs, reopen, 14 days, comment on, own dom
     && $builtIn['bad_stars'] === 2 && $builtIn['bad_nps'] === 6);
 check('config: off until switched on', $builtIn['enabled'] === false);
 foreach (array('enabled', 'mode', 'scale', 'on_bad', 'bad_stars', 'bad_nps', 'valid_days', 'exclude_depts', 'exclude_topics',
-             'exclude_domains', 'exclude_own', 'comment_on', 'language', 'subject', 'text', 'question', 'line', 'foot_on',
-             'foot', 'accent') as $k) {
+             'exclude_statuses', 'exclude_domains', 'exclude_own', 'comment_on', 'note_sent', 'language', 'subject', 'text',
+             'question', 'line', 'foot_on', 'foot', 'accent') as $k) {
     check("config: field $k exists", isset($opts[$k]));
 }
 
@@ -82,6 +82,13 @@ check('settings: unknown choices fall back to the defaults', $s['mode'] === 'mai
 check('settings: checkbox values', FeedbackSettings::normalise(array('enabled' => '0'))['enabled'] === false
     && FeedbackSettings::normalise(array('enabled' => true))['enabled'] === true
     && FeedbackSettings::normalise(array('comment_on' => ''))['comment_on'] === false);
+check('settings: note after sending is short by default, unknown falls back',
+    FeedbackSettings::normalise(array())['note_sent'] === 'short'
+    && FeedbackSettings::normalise(array('note_sent' => 'full'))['note_sent'] === 'full'
+    && FeedbackSettings::normalise(array('note_sent' => 'off'))['note_sent'] === 'off'
+    && FeedbackSettings::normalise(array('note_sent' => 'loud'))['note_sent'] === 'short');
+check('settings: closing statuses from a multiselect', FeedbackSettings::normalise(array('exclude_statuses' => '{"3":"Hinfällig"}'))['exclude_statuses'] === array(3)
+    && FeedbackSettings::normalise(array())['exclude_statuses'] === array());
 
 // -------------------------------------------------------------------- scale
 
@@ -189,10 +196,27 @@ $agent = FeedbackMail::agent($s, $de, 'X', '&#x1F44E; (nicht zufrieden)', "Gar <
 check('agent mail: comment escaped with line breaks', strpos($agent['body'], 'Gar &lt;nicht&gt; gut<br') !== false);
 check('agent mail: subject names the bad rating', strpos($agent['subj'], 'Schlechte Bewertung') !== false);
 
+$exp = mktime(12, 0, 0, 11, 22, 2026);
+$short = FeedbackMail::sentNote($s, $de, 'kim@acme.example', $exp, 'Kurze Frage [001]', $mail['body']);
+check('sent note: short names recipient, scale and validity', strpos($short, 'kim@acme.example') !== false
+    && strpos($short, 'Skala: Daumen') !== false && strpos($short, '22.11.2026') !== false);
+check('sent note: short has no links', strpos($short, '?v=') === false && strpos($short, '<hr>') === false);
+$full = FeedbackMail::sentNote(FeedbackSettings::normalise(array('note_sent' => 'full')), $de, 'kim@acme.example', $exp,
+    'Kurze Frage [001]', $mail['body']);
+check('sent note: full carries the mail with both links', strpos($full, '<hr>') !== false && substr_count($full, '?v=') === 2
+    && strpos($full, 'Kurze Frage [001]') !== false);
+check('sent note: full keeps the button words, drops the emojis (3-byte utf8)', strpos($full, 'Nicht gut') !== false
+    && stripos($full, '&#x1F44') === false && preg_match('/[\x{10000}-\x{10FFFF}]/u', $full) === 0);
+check('sent note: recipient escaped', strpos(FeedbackMail::sentNote($s, $de, '<b>x</b>', $exp, '', ''), '<b>') === false);
+check('beyond BMP: entities and literals removed, the rest kept', FeedbackMail::noBeyondBmp('a &#x1F44D; b &#128078; c 👍 d &#x2605; &amp;')
+    === 'a b c d &#x2605; &amp;', FeedbackMail::noBeyondBmp('a &#x1F44D; b &#128078; c 👍 d &#x2605; &amp;'));
+check('i18n: no 4-byte characters in the sent notes', preg_match('/[\x{10000}-\x{10FFFF}]/u',
+    $de['note_sent_title'] . $de['note_sent'] . $de['note_mail'] . $de['note_failed']) === 0);
+
 // -------------------------------------------------------------------- rules
 
 $on = FeedbackSettings::normalise(array('enabled' => '1', 'exclude_depts' => array(9), 'exclude_topics' => array(4),
-    'exclude_domains' => 'partner.example'));
+    'exclude_domains' => 'partner.example', 'exclude_statuses' => array(3)));
 $facts = array('closed' => true, 'child' => false, 'dept' => 1, 'topic' => 1, 'email' => 'alice@acme.example',
     'own_domains' => array('support.example.com', 'example.com'), 'human_replies' => 1, 'ai_closer' => false, 'asked' => false);
 check('rules: plain case asks', FeedbackRules::skipReason($on, $facts) === '');
@@ -205,6 +229,7 @@ $cases = array(
     'no_reply'  => array($on, array('human_replies' => 0)),
     'dept'      => array($on, array('dept' => 9)),
     'topic'     => array($on, array('topic' => 4)),
+    'status'    => array($on, array('status' => 3)),
     'no_email'  => array($on, array('email' => '')),
 );
 foreach ($cases as $reason => $c) {

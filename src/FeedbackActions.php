@@ -151,6 +151,23 @@ final class FeedbackActions
         $email->sendAlert($staff, FeedbackMail::oneLine((string) $msg['subj']), (string) $msg['body']);
     }
 
+    /** After the question went out: a note, unless switched off. Mail mode only. */
+    public static function sentNote(Ticket $ticket, array $s, string $to, int $expires, string $subject, string $body): void
+    {
+        if ($s['note_sent'] === FeedbackSettings::NOTE_OFF) {
+            return;
+        }
+        $t = self::strings();
+        self::note($ticket, $t['note_sent_title'], FeedbackMail::sentNote($s, $t, $to, $expires, $subject, $body));
+    }
+
+    /** A question that couldn't be sent: always a note, so nobody believes the customer was asked. */
+    public static function failedNote(Ticket $ticket, string $to): void
+    {
+        $t = self::strings();
+        self::note($ticket, $t['note_sent_title'], FeedbackMail::e(sprintf($t['note_failed'], $to !== '' ? $to : '?')));
+    }
+
     private static function note(Ticket $ticket, string $title, string $html): void
     {
         $ticket->logNote($title, $html, $title, false);

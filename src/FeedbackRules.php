@@ -12,7 +12,7 @@ final class FeedbackRules
      * Empty string: ask. Otherwise the reason not to.
      *
      * @param array<string,mixed> $s     FeedbackSettings::get()
-     * @param array<string,mixed> $facts closed, child, dept, topic, email, own_domains, human_replies, ai_closer, asked
+     * @param array<string,mixed> $facts closed, child, dept, topic, status, email, own_domains, human_replies, ai_closer, asked
      */
     public static function skipReason(array $s, array $facts): string
     {
@@ -39,6 +39,9 @@ final class FeedbackRules
         }
         if (in_array((int) ($facts['topic'] ?? 0), $s['exclude_topics'], true)) {
             return 'topic';
+        }
+        if (in_array((int) ($facts['status'] ?? 0), $s['exclude_statuses'], true)) {
+            return 'status';
         }
         $domain = self::domain((string) ($facts['email'] ?? ''));
         if ($domain === '') {

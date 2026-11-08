@@ -23,6 +23,7 @@ Die Bewertungen bleiben in der Datenbank des Helpdesks. Kein Umfragedienst, kein
 - Tickets, die ein KI-Agent schließt (Agenten mit dem Backend `ai-agent`, wie [AI Actions](https://github.com/studio-prisma/osticket-plugin-ai-actions) sie anlegt), auch wenn das im Cron passiert
 - Unter-Tickets
 - Abteilungen, Hilfethemen und Absender-Domains aus den Einstellungen; standardmäßig die eigenen Domains des Helpdesks
+- Schließen mit einem Status wie „Dublette“ oder „Spam“ (Einstellung, nach Namen vorausgewählt)
 - Tickets, zu denen schon gefragt wurde
 
 ## Voraussetzungen
@@ -47,7 +48,8 @@ Schritt für Schritt mit Prüfpunkten: **[docs/INSTALL.de.md](docs/INSTALL.de.md
 | Bad means | Sterne bis … / NPS bis … | 2 / 6 |
 | Link valid for | Tage (1–90) | 14 |
 | Comment field after the click | an / aus | an |
-| Never ask for | Abteilungen, Hilfethemen, Absender-Domains, eigene Domains | Abteilungen mit „Alert“/„Protokoll“ im Namen, eigene Domains |
+| Note at the ticket when asked | keine / kurz / mit der gesendeten Mail | kurz; ein gescheiterter Versand bekommt immer eine Notiz |
+| Never ask for | Abteilungen, Hilfethemen, Status beim Schließen, Absender-Domains, eigene Domains | Abteilungen mit „Alert“/„Protokoll“ im Namen, Status mit „Duplicate“/„Spam“/„Hinfällig“ im Namen, eigene Domains |
 | Texte | Betreff, Mailtext, Frage, Zeile, KI-Hinweis; leer = eingebauter Text | eingebaut, Deutsch (du) oder Englisch |
 | Accent colour | `#rrggbb` | `#330066` |
 
@@ -66,6 +68,8 @@ Die Mailtexte verstehen osTicket-Variablen wie `%{ticket.number}` und `%{recipie
 - **Spitze Klammern in Kommentaren** erscheinen in der Notiz als ‹ ›, weil der Sanitizer von osTicket alles entfernt, was wie ein Tag aussieht.
 - **Modus „Zeile“** braucht eine Antwort, die den Status auf geschlossen setzt. Schließen ohne Antwort fragt in diesem Modus niemanden, und eine Antwort mit „Antworten an: niemand“ trägt keine Zeile und zählt nicht als gefragt.
 - **Safe Links mit JavaScript:** Ein Scanner, der das JavaScript der Seite in einer Sandbox ausführt, würde die Bewertung abschicken. Bisher nicht beobachtet; im echten Microsoft-365-Tenant zu prüfen.
+- **Häkchen-Standardwerte bei einer neuen Instanz:** osTicket 1.18 speichert sie beim ersten Speichern nicht. Nach dem Anlegen die Instanz noch einmal öffnen und die Häkchen prüfen (siehe INSTALL, Schritt 2).
+- **Notiz „mit der Mail“** legt die Bewertungslinks des Kunden ans Ticket. Jeder Agent, der das Ticket öffnen darf, kann ihnen folgen; das ist der Preis dafür, genau zu sehen, was rausging.
 - **Nur eine Frage,** keine Erinnerungen, kein Export, keine Bewertung einzelner Agenten. Das ist bewusst außerhalb des Umfangs.
 - **Wochenzusammenfassung von AI Actions:** Das Plugin beantwortet das Signal `feedback.digest` mit einer Zeile. AI Actions schickt es noch nicht.
 

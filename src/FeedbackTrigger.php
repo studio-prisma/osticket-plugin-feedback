@@ -161,6 +161,8 @@ final class FeedbackTrigger
         if (!FeedbackStore::claim($id)) {
             return;
         }
+        $ticket = null;
+        $to = '';
         try {
             $row = FeedbackStore::find($id);
             $ticket = $row ? Ticket::lookup((int) $row['ticket_id']) : null;
@@ -179,8 +181,10 @@ final class FeedbackTrigger
             $owner = $ticket->getOwner();
             $dept = $ticket->getDept();
             $email = ($dept ? $dept->getEmail() : null) ?: ($cfg ? $cfg->getDefaultEmail() : null);
+            $to = $owner ? (string) $owner->getEmail() : '';
             if (!$owner || !$email) {
                 FeedbackStore::failed($id);
+                FeedbackActions::failedNote($ticket, $to);
                 return;
             }
             $nonce = FeedbackToken::nonce();
@@ -196,12 +200,23 @@ final class FeedbackTrigger
                 // Threading: a reply to this mail lands in the ticket.
                 $options['thread'] = $last;
             }
-            if ($email->send($owner, FeedbackMail::oneLine((string) $msg['subj']), (string) $msg['body'], null, $options) === false) {
+            $subject = FeedbackMail::oneLine((string) $msg['subj']);
+            if ($email->send($owner, $subject, (string) $msg['body'], null, $options) === false) {
                 FeedbackStore::failed($id);
+                FeedbackActions::failedNote($ticket, $to);
+                return;
             }
+            FeedbackActions::sentNote($ticket, $s, $to, $expires, $subject, (string) $msg['body']);
         } catch (\Throwable $e) {
             FeedbackStore::failed($id);
             self::log('send', $e);
+            if ($ticket) {
+                try {
+                    FeedbackActions::failedNote($ticket, $to);
+                } catch (\Throwable $e2) {
+                    self::log('note', $e2);
+                }
+            }
         }
     }
 
@@ -224,6 +239,7 @@ final class FeedbackTrigger
             'child'         => (int) $ticket->getPid() > 0,
             'dept'          => (int) $ticket->getDeptId(),
             'topic'         => (int) $ticket->getTopicId(),
+            'status'        => (int) $ticket->getStatusId(),
             'email'         => $email,
             'own_domains'   => self::ownDomains(),
             'human_replies' => self::humanReplies($ticket),

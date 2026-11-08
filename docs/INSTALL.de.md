@@ -48,9 +48,12 @@ Prüfung: `include/plugins/feedback/` enthält `plugin.php`, `config.php`, `clas
 3. Reiter „Instanzen“ → „Neue Instanz hinzufügen“, Name z. B. `Feedback`, Haken bei „Aktiv“.
 4. In der Instanz die Einstellungen durchgehen. **„Ask customers“ bleibt aus.**
    - „Never ask for → Departments“: Abteilungen für Alerts, Monitoring, Protokolle. Vorausgewählt sind Abteilungen mit „Alert“, „Protokoll“ oder „Monitoring“ im Namen.
+   - „Closing statuses“: Schließen mit einem dieser Status fragt nie, z. B. „Dublette“ oder „Spam“. Vorausgewählt sind geschlossene Status mit „Duplicate“, „Spam“, „Rejected“ oder „Hinfällig“ im Namen.
    - „Help topics“ und „Sender domains“ nach Bedarf, z. B. Domains von Partnern, die nicht gefragt werden sollen.
+   - „Note at the ticket when asked“: kurz (Standard), mit der gesendeten Mail oder keine. Mit der Mail sieht jeder Agent, der das Ticket öffnet, die Bewertungslinks des Kunden.
    - Texte leer lassen für den eingebauten Text (Du-Form). „Language of the built-in texts“ auf „Deutsch (du)“, wenn das Helpdesk nicht auf Deutsch steht.
 5. Speichern.
+6. **Instanz noch einmal öffnen und die Häkchen prüfen.** osTicket 1.18 speichert beim Anlegen einer Instanz die Standardwerte von Häkchen nicht: Nach dem ersten Speichern können „Comment field after the click“, „Own domains“ und „Footer with AI notice“ aus sein, obwohl sie standardmäßig an sind. Gewünschte Häkchen wieder setzen, Speichern, erneut öffnen und prüfen, dass sie bleiben.
 
 Prüfung: Agentenpanel → Anwendungen → „Feedback“ öffnet die Auswertung mit „Status: aus“ und ohne rote Meldung.
 
@@ -74,10 +77,11 @@ Prüfung: beides gesetzt. Ohne Schritt 2 wird das Ticket trotzdem geöffnet und 
 1. „Ask customers“ an, Speichern.
 2. Testticket mit der Testadresse aus Schritt 0 anlegen, als Agent darauf antworten, Ticket schließen.
 3. In der Testadresse liegt eine Mail „Kurze Frage zu deinem Ticket [Nummer]“ mit 👍/👎.
-4. 👍 klicken: Seite „Danke!“, am Ticket die interne Notiz „Kundenbewertung · Bewertung: Daumen hoch (zufrieden)“. Das Ticket bleibt zu.
-5. Zweites Testticket, gleicher Ablauf, 👎 klicken, Kommentar schreiben, „Kommentar senden“: Das Ticket ist offen, dem Agenten zugewiesen, der geantwortet hat, und er hat eine Zuweisungsmail mit Bewertung und Kommentar.
+4. Am Ticket: interne Notiz „Zufriedenheitsfrage“ mit Empfänger und Gültigkeit. Steht dort „konnte nicht gesendet werden“, ist der Mailversand von osTicket gescheitert (Systemprotokoll; bei OAuth das Token des ausgehenden Kontos prüfen).
+5. 👍 klicken: Seite „Danke!“, am Ticket die interne Notiz „Kundenbewertung · Bewertung: Daumen hoch (zufrieden)“. Das Ticket bleibt zu.
+6. Zweites Testticket, gleicher Ablauf, 👎 klicken, Kommentar schreiben, „Kommentar senden“: Das Ticket ist offen, dem Agenten zugewiesen, der geantwortet hat, und er hat eine Zuweisungsmail mit Bewertung und Kommentar.
 
-Abbruch, wenn: bei Schritt 3 keine Mail kommt. Dann zuerst prüfen: Ist die Kundenadresse eine eigene Domain? Hat ein Agent geantwortet (keine KI)? Ist die Abteilung ausgenommen? Steht im Systemprotokoll ein Eintrag „Feedback plugin“?
+Abbruch, wenn: bei Schritt 3 keine Mail kommt. Dann zuerst prüfen: Steht am Ticket eine Notiz „Zufriedenheitsfrage“ (siehe Schritt 4)? Ist die Kundenadresse eine eigene Domain? Hat ein Agent geantwortet (keine KI)? Ist die Abteilung oder der Status beim Schließen ausgenommen? Steht im Systemprotokoll ein Eintrag „Feedback plugin“?
 
 ---
 
@@ -107,5 +111,5 @@ Gespeichert werden Ticket-ID, Bewertung, Kommentar, Zeit und ein Hash der IP-Adr
 
 ## 7. Update und Entfernen
 
-- **Update:** neuen Ordner über den alten entpacken. Die Tabellen bleiben, Einstellungen auch.
+- **Update:** neuen Ordner über den alten entpacken. Die Tabellen bleiben, Einstellungen auch. Neue Einstellungen gelten mit ihrem eingebauten Standard, bis die Instanz einmal gespeichert ist: Instanz öffnen, neue Felder prüfen, Speichern.
 - **Entfernen:** Instanz löschen, Plugin deinstallieren, Ordner löschen. Die Tabellen `<prefix>feedback_request` und `<prefix>feedback_hit` bleiben in der Datenbank, bis du sie selbst löschst (`DROP TABLE`). Die Notizen an den Tickets bleiben.

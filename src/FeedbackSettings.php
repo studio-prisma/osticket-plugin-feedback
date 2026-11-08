@@ -12,6 +12,9 @@ final class FeedbackSettings
     public const MODE_LINE = 'line';
     public const BAD_REOPEN = 'reopen';
     public const BAD_NOTIFY = 'notify';
+    public const NOTE_OFF = 'off';
+    public const NOTE_SHORT = 'short';
+    public const NOTE_FULL = 'full';
 
     /** @var array<string,mixed>|null */
     private static $current = null;
@@ -39,6 +42,7 @@ final class FeedbackSettings
         $bad = (string) ($raw['on_bad'] ?? '');
         $lang = (string) ($raw['language'] ?? '');
         $accent = (string) ($raw['accent'] ?? '');
+        $note = (string) ($raw['note_sent'] ?? '');
         return array(
             'enabled'        => self::flag($raw['enabled'] ?? false),
             'mode'           => in_array($mode, array(self::MODE_MAIL, self::MODE_LINE), true) ? $mode : self::MODE_MAIL,
@@ -49,9 +53,12 @@ final class FeedbackSettings
             'valid_days'     => self::int($raw['valid_days'] ?? null, 14, 1, 90),
             'exclude_depts'  => self::ids($raw['exclude_depts'] ?? null),
             'exclude_topics' => self::ids($raw['exclude_topics'] ?? null),
+            'exclude_statuses' => self::ids($raw['exclude_statuses'] ?? null),
             'exclude_domains'=> self::domains((string) ($raw['exclude_domains'] ?? '')),
             'exclude_own'    => self::flag($raw['exclude_own'] ?? true),
             'comment_on'     => self::flag($raw['comment_on'] ?? true),
+            'note_sent'      => in_array($note, array(self::NOTE_OFF, self::NOTE_SHORT, self::NOTE_FULL), true)
+                ? $note : self::NOTE_SHORT,
             'language'       => in_array($lang, array('de', 'en'), true) ? $lang : 'auto',
             'accent'         => preg_match('/^#[0-9a-fA-F]{6}$/D', $accent) === 1 ? strtolower($accent) : '#330066',
             'subject'        => self::text($raw['subject'] ?? '', 200),

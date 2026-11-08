@@ -89,6 +89,18 @@ class FeedbackConfig extends PluginConfig
                 ),
             )),
 
+            'note_sent' => new ChoiceField(array(
+                'label'   => 'Note at the ticket when asked',
+                'default' => 'short',
+                'choices' => array(
+                    'off'   => 'No note',
+                    'short' => 'Short note: recipient, scale, valid until',
+                    'full'  => 'Short note plus the mail as sent, with its rating links',
+                ),
+                'hint'    => 'Own mail only. A failed send always gets a note. With the mail, every agent who '
+                           . 'opens the ticket sees the customer\'s rating links.',
+            )),
+
             'sec_except' => new SectionBreakField(array(
                 'label' => 'Never ask for',
             )),
@@ -105,6 +117,15 @@ class FeedbackConfig extends PluginConfig
                 'label'         => 'Help topics',
                 'default'       => '',
                 'choices'       => self::topics(),
+                'configuration' => array('multiselect' => true, 'prompt' => 'None'),
+            )),
+
+            'exclude_statuses' => new ChoiceField(array(
+                'label'         => 'Closing statuses',
+                'default'       => self::defaultStatuses(),
+                'choices'       => self::closedStatuses(),
+                'hint'          => 'Closing with one of these never asks, e.g. duplicates or spam. Preselected: closed '
+                                 . 'statuses named like "Duplicate", "Spam", "Rejected" or "Hinfällig".',
                 'configuration' => array('multiselect' => true, 'prompt' => 'None'),
             )),
 
@@ -206,6 +227,28 @@ class FeedbackConfig extends PluginConfig
             $out[(int) $r[0]] = (string) $r[1];
         }
         return $out;
+    }
+
+    /** Statuses whose state is "closed". @return array<int,string> */
+    private static function closedStatuses(): array
+    {
+        $out = array();
+        if (!function_exists('db_query') || !defined('TICKET_STATUS_TABLE')) {
+            return $out;
+        }
+        $res = db_query(sprintf("SELECT id, name FROM %s WHERE state='closed' ORDER BY sort, name", TICKET_STATUS_TABLE));
+        while ($res && ($r = db_fetch_row($res))) {
+            $out[(int) $r[0]] = (string) $r[1];
+        }
+        return $out;
+    }
+
+    /** Closing statuses that mean "nothing was done", by name. @return array<int,string> */
+    private static function defaultStatuses(): array
+    {
+        return array_filter(self::closedStatuses(), static function (string $name): bool {
+            return preg_match('/duplicate|dublette|spam|reject|abgelehnt|hinf(ä|ae)llig|obsolete|invalid/iu', $name) === 1;
+        });
     }
 
     /** Departments for alerts and logs, by name. @return array<int,string> */
