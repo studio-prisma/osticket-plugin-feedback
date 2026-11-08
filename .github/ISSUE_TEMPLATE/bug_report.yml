@@ -5,8 +5,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please do **not** paste your Cloudflare secret key, ticket contents, or customer
-        data into this form. Redact hostnames if they are not public.
+        Please do **not** paste ticket contents, customer names, e-mail addresses or
+        feedback links into this form. Redact hostnames if they are not public.
+
+        If a link can be forged, reused for another ticket, or reveals ticket data,
+        this is a security issue: report it privately via the security link, not here.
 
   - type: textarea
     id: what-happened
@@ -21,8 +24,8 @@ body:
     attributes:
       label: Steps to reproduce
       placeholder: |
-        1. Enable "Client login"
-        2. Open /login.php in a private window
+        1. Reply to a ticket as an agent
+        2. Close it with status "Resolved"
         3. ...
     validations:
       required: true
@@ -47,7 +50,7 @@ body:
     id: plugin-version
     attributes:
       label: Plugin version
-      placeholder: "1.0.0"
+      placeholder: "0.1.0"
     validations:
       required: true
 
@@ -56,23 +59,23 @@ body:
     attributes:
       label: Affected area
       options:
-        - Guest ticket form
-        - Client registration
-        - Client login
-        - Staff login
+        - Who gets asked (trigger, exceptions)
+        - Feedback mail or line under the closing reply
+        - Click page
+        - Note, reopen or assignment after a rating
+        - Evaluation page
         - Plugin configuration
-        - Content-Security-Policy
         - Other / unclear
     validations:
       required: true
 
   - type: dropdown
-    id: fail-mode
+    id: mode
     attributes:
-      label: Fail mode
+      label: When to ask
       options:
-        - closed
-        - open
+        - Own mail on close
+        - Line under the closing reply
     validations:
       required: true
 
@@ -88,8 +91,5 @@ body:
     attributes:
       label: Before submitting
       options:
-        - label: I tested in a fresh private window (no reused cookie jar)
-          required: true
-        - label: The browser console shows no CSP error for challenges.cloudflare.com
-        - label: I have removed all secrets and customer data from this report
+        - label: I have removed all customer data and feedback links from this report
           required: true

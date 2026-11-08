@@ -22,7 +22,7 @@ body:
     id: plugin-version
     attributes:
       label: Plugin version
-      placeholder: "1.0.0"
+      placeholder: "0.1.0"
     validations:
       required: true
 
@@ -31,8 +31,8 @@ body:
     attributes:
       label: Result
       options:
-        - Works — all four protected areas
-        - Works — guest ticket form only
+        - Works — mail, click page and note
+        - Works — own mail only, line mode not tested
         - Partially broken
         - Does not work
     validations:

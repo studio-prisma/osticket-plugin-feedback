@@ -12,21 +12,21 @@
 
 ## Security impact
 
-- [ ] Touches token validation, the siteverify call, or the fail mode
-- [ ] Touches the login gate or the CSP handling
-- [ ] Touches configuration validation (`pre_save`)
+- [ ] Changes the token or its validation (`FeedbackToken`)
+- [ ] Changes the public click page, CSRF or rate limits (`FeedbackPage`)
+- [ ] Changes what is stored or how long (`FeedbackStore`)
+- [ ] Changes who gets asked (`FeedbackRules`, `FeedbackTrigger`)
 - [ ] No security-relevant surface touched
 
-If any box above is checked, describe the threat model change:
+If any box above is checked, describe what an outsider with a link (or without one) can now do:
 
 <!-- ... -->
 
 ## Verification
 
-- [ ] `tests/run-all.sh` passes locally (state your PHP version: ______)
-- [ ] Verified against a real osTicket 1.18.x instance
-- [ ] Secret key does not appear in HTML, logs, or error messages
-- [ ] No hardcoded hostnames, credentials, or absolute paths added
+- [ ] `php tests/unit.php` passes (PHP version: ______)
+- [ ] `npx playwright test` passes against `dev/up.sh`
+- [ ] No hardcoded hostnames, credentials or absolute paths added
 
 ## Related issues
 
