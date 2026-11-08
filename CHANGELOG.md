@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-08
+
+### Added
+
+- **Closing statuses that never ask** (setting "Never ask for → Closing statuses"). Preselected: closed statuses named like "Duplicate", "Spam", "Rejected" or "Hinfällig". Closing with such a status leaves no trace; a later close with another status still asks.
+- **Note at the ticket when asked** (own mail mode): short (recipient, scale, valid until; default), short plus the mail as sent with its rating links, or none.
+- **Note on a failed send**, always: the question couldn't be sent and isn't retried.
+
+### Documentation
+
+- INSTALL: after creating the instance, open it again and check the checkboxes. osTicket 1.18 doesn't store checkbox defaults on the first save.
+- INSTALL: new settings apply their built-in default until the instance is saved once.
+
 ## [0.1.0] - 2026-11-03
 
 ### Added
@@ -22,5 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Retention: rows are deleted after 24 months; the IP is stored only as a keyed hash.
 - Mail in the style of a brand line over an accent rule, buttons as table cells, a grey footer with an AI notice; texts editable, German (informal) and English built in.
 
-[Unreleased]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/studio-prisma/osticket-plugin-feedback/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/studio-prisma/osticket-plugin-feedback/releases/tag/v0.1.0
