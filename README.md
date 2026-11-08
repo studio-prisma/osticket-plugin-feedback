@@ -23,6 +23,7 @@ Ratings stay in the help desk's own database. No survey service, no tracking pix
 - tickets an AI agent closes (agents with the backend `ai-agent`, as [AI Actions](https://github.com/studio-prisma/osticket-plugin-ai-actions) creates them), including closes it makes in osTicket's cron
 - sub-tickets
 - departments, help topics and sender domains from the settings; the help desk's own domains by default
+- closes with a status like "Duplicate" or "Spam" (setting, preselected by name)
 - tickets that were already asked
 
 ## Requirements
@@ -47,7 +48,8 @@ Step by step with checkpoints: **[docs/INSTALL.md](docs/INSTALL.md)**. Short ver
 | Bad means | stars up to … / NPS up to … | 2 / 6 |
 | Link valid for | days (1–90) | 14 |
 | Comment field after the click | on / off | on |
-| Never ask for | departments, help topics, sender domains, own domains | departments named like "Alert"/"Protokoll", own domains |
+| Note at the ticket when asked | none / short / with the mail as sent | short; a failed send always gets a note |
+| Never ask for | departments, help topics, closing statuses, sender domains, own domains | departments named like "Alert"/"Protokoll", statuses named like "Duplicate"/"Spam"/"Hinfällig", own domains |
 | Texts | subject, mail text, question, line, AI notice; empty = built-in text | built-in, German (informal) or English |
 | Accent colour | `#rrggbb` | `#330066` |
 
@@ -66,6 +68,8 @@ The mail texts accept osTicket variables such as `%{ticket.number}` and `%{recip
 - **Angle brackets in comments** appear as ‹ › in the note, because osTicket's sanitizer strips anything that looks like a tag.
 - **"Line" mode** needs a reply that sets the closed status. Closing without a reply asks nobody in that mode, and a reply posted with "Reply to: none" carries no line and doesn't count as asked.
 - **Safe Links with JavaScript:** a scanner that runs the page's JavaScript in a sandbox would submit the rating. Not observed so far; to be checked against a real Microsoft 365 tenant.
+- **Checkbox defaults on a new instance:** osTicket 1.18 doesn't store them on the first save. Open the instance again after creating it and check the boxes (see INSTALL, step 2).
+- **"With the mail" note** puts the customer's rating links into the ticket. Any agent who can open the ticket can follow them; that is a trade-off for seeing exactly what went out.
 - **Only one question,** no reminders, no export, no per-agent rating. These are out of scope on purpose.
 - **AI Actions weekly summary:** the plugin answers the signal `feedback.digest` with one line. AI Actions doesn't send it yet.
 

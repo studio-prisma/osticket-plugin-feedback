@@ -9,7 +9,7 @@
 
 return array(
     'id'          => 'studio-prisma:feedback',
-    'version'     => '0.1.0',
+    'version'     => '0.1.1',
     'ost_version' => '1.18',
     'name'        => 'Feedback',
     'author'      => 'Studio Prisma',

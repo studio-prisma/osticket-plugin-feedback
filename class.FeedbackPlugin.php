@@ -41,7 +41,7 @@ require_once __DIR__ . '/src/FeedbackAdmin.php';
 class FeedbackPlugin extends Plugin
 {
     /** Mirrors plugin.php. */
-    public const VERSION = '0.1.0';
+    public const VERSION = '0.1.1';
 
     /** Route bases, relative to the help desk root. */
     public const CLIENT_BASE = 'ajax.php/feedback';
@@ -74,7 +74,8 @@ class FeedbackPlugin extends Plugin
         }
         $raw = array();
         foreach (array('enabled', 'mode', 'scale', 'on_bad', 'bad_stars', 'bad_nps', 'valid_days', 'exclude_depts',
-                     'exclude_topics', 'exclude_domains', 'exclude_own', 'comment_on', 'language', 'subject', 'text',
+                     'exclude_topics', 'exclude_statuses', 'exclude_domains', 'exclude_own', 'comment_on', 'note_sent',
+                     'language', 'subject', 'text',
                      'question', 'line', 'foot_on', 'foot', 'accent') as $k) {
             $raw[$k] = $config->get($k);
         }
