@@ -34,6 +34,49 @@ final class FeedbackTrigger
     /** @var bool */
     private static $flushing = false;
 
+    /** @var array<int, string> where this request's closes came from, by ticket ID (for the note) */
+    private static $sources = array();
+
+    /**
+     * "web" for an agent form on one ticket, "mass" for the status change of
+     * selected tickets in the list, "api" without an agent session (API, cron).
+     */
+    public static function source(int $closer): string
+    {
+        if ($closer < 1) {
+            return 'api';
+        }
+        $info = (string) ($_SERVER['PATH_INFO'] ?? '');
+        if (preg_match('#^/tickets/status/#', $info) === 1 || (($_POST['a'] ?? '') === 'mass_process')) {
+            return 'mass';
+        }
+        return 'web';
+    }
+
+    public static function sourceOf(int $ticketId): string
+    {
+        return self::$sources[$ticketId] ?? '';
+    }
+
+    /**
+     * Never ask this ticket, with a note. Only when the rules would ask it
+     * now; a ticket that wouldn't be asked anyway gets no row and no note.
+     * $how: "close" (tick removed or API said no) or "menu".
+     */
+    public static function decline(Ticket $ticket, array $s, int $staffId, string $how): bool
+    {
+        $facts = self::facts($ticket);
+        $facts['closed'] = true;
+        if ($how === 'close' && FeedbackRules::skipReason($s, $facts) !== '') {
+            return false;
+        }
+        if (!FeedbackStore::decline((int) $ticket->getId(), $s['scale'], $staffId)) {
+            return false;
+        }
+        FeedbackActions::declinedNote($ticket, $how, $staffId);
+        return true;
+    }
+
     public static function onEntry($entry): void
     {
         try {
@@ -77,6 +120,16 @@ final class FeedbackTrigger
             if ($closer && self::isAi($closer)) {
                 return;
             }
+            // Who decides (0.2): the agent's tick, the API's feedback flag or the setting.
+            $source = self::source($closer);
+            $decision = FeedbackRules::decide($s, $source, FeedbackRules::askValue($_POST['feedback_ask'] ?? null));
+            if ($decision !== 'ask') {
+                if ($decision === 'decline') {
+                    self::decline($model, $s, $closer, 'close');
+                }
+                return;
+            }
+            self::$sources[(int) $model->getId()] = $source;
             if ($s['mode'] === FeedbackSettings::MODE_LINE) {
                 self::line($model, $s, $closer);
                 return;
@@ -206,7 +259,8 @@ final class FeedbackTrigger
                 FeedbackActions::failedNote($ticket, $to);
                 return;
             }
-            FeedbackActions::sentNote($ticket, $s, $to, $expires, $subject, (string) $msg['body']);
+            FeedbackActions::sentNote($ticket, $s, $to, $expires, $subject, (string) $msg['body'],
+                self::sourceOf((int) $ticket->getId()));
         } catch (\Throwable $e) {
             FeedbackStore::failed($id);
             self::log('send', $e);

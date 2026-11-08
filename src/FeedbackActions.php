@@ -152,13 +152,34 @@ final class FeedbackActions
     }
 
     /** After the question went out: a note, unless switched off. Mail mode only. */
-    public static function sentNote(Ticket $ticket, array $s, string $to, int $expires, string $subject, string $body): void
+    public static function sentNote(Ticket $ticket, array $s, string $to, int $expires, string $subject, string $body,
+        string $source = ''): void
     {
         if ($s['note_sent'] === FeedbackSettings::NOTE_OFF) {
             return;
         }
         $t = self::strings();
-        self::note($ticket, $t['note_sent_title'], FeedbackMail::sentNote($s, $t, $to, $expires, $subject, $body));
+        self::note($ticket, $t['note_sent_title'], FeedbackMail::sentNote($s, $t, $to, $expires, $subject, $body, $source));
+    }
+
+    /** $how: "close" (tick removed at closing, or the API said no), "menu" (switched off in advance). */
+    public static function declinedNote(Ticket $ticket, string $how, int $staffId): void
+    {
+        $t = self::strings();
+        $key = $how === 'menu' ? 'note_declined_menu' : 'note_declined_close';
+        self::note($ticket, $t['note_sent_title'], FeedbackMail::e(sprintf($t[$key], self::who($staffId, $t))));
+    }
+
+    public static function allowedNote(Ticket $ticket, int $staffId): void
+    {
+        $t = self::strings();
+        self::note($ticket, $t['note_sent_title'], FeedbackMail::e(sprintf($t['note_allowed'], self::who($staffId, $t))));
+    }
+
+    private static function who(int $staffId, array $t): string
+    {
+        $staff = $staffId > 0 ? Staff::lookup($staffId) : null;
+        return $staff instanceof Staff ? (string) $staff->getName() : $t['by_system'];
     }
 
     /** A question that couldn't be sent: always a note, so nobody believes the customer was asked. */

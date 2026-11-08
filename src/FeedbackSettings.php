@@ -15,6 +15,9 @@ final class FeedbackSettings
     public const NOTE_OFF = 'off';
     public const NOTE_SHORT = 'short';
     public const NOTE_FULL = 'full';
+    public const SESSION_ASK = 'ask';
+    public const SESSION_REQUESTED = 'requested';
+    public const SESSION_NEVER = 'never';
 
     /** @var array<string,mixed>|null */
     private static $current = null;
@@ -43,6 +46,7 @@ final class FeedbackSettings
         $lang = (string) ($raw['language'] ?? '');
         $accent = (string) ($raw['accent'] ?? '');
         $note = (string) ($raw['note_sent'] ?? '');
+        $session = (string) ($raw['no_session'] ?? '');
         return array(
             'enabled'        => self::flag($raw['enabled'] ?? false),
             'mode'           => in_array($mode, array(self::MODE_MAIL, self::MODE_LINE), true) ? $mode : self::MODE_MAIL,
@@ -59,6 +63,9 @@ final class FeedbackSettings
             'comment_on'     => self::flag($raw['comment_on'] ?? true),
             'note_sent'      => in_array($note, array(self::NOTE_OFF, self::NOTE_SHORT, self::NOTE_FULL), true)
                 ? $note : self::NOTE_SHORT,
+            'agent_decline'  => self::flag($raw['agent_decline'] ?? true),
+            'no_session'     => in_array($session, array(self::SESSION_ASK, self::SESSION_REQUESTED, self::SESSION_NEVER), true)
+                ? $session : self::SESSION_ASK,
             'language'       => in_array($lang, array('de', 'en'), true) ? $lang : 'auto',
             'accent'         => preg_match('/^#[0-9a-fA-F]{6}$/D', $accent) === 1 ? strtolower($accent) : '#330066',
             'subject'        => self::text($raw['subject'] ?? '', 200),
