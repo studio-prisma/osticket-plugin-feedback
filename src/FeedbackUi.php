@@ -25,10 +25,24 @@ final class FeedbackUi
             return;
         }
         $script = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
-        if (preg_match('#/scp/tickets\.php$#', $script) !== 1 || !isset($_GET['id'])) {
+        if (preg_match('#/scp/tickets\.php$#', $script) !== 1 || (!isset($_REQUEST['id']) && !isset($_REQUEST['number']))) {
             return;
         }
         ob_start(array(__CLASS__, 'inject'));
+    }
+
+    /** The ticket the view shows, found the way scp/tickets.php finds it: by ID, else by number. */
+    private static function viewedTicket(): ?Ticket
+    {
+        $id = $_REQUEST['id'] ?? null;
+        if (is_scalar($id) && ctype_digit((string) $id)) {
+            return Ticket::lookup((int) $id) ?: null;
+        }
+        $number = $_REQUEST['number'] ?? null;
+        if (is_scalar($number) && preg_match('/^[A-Za-z0-9_-]{1,32}$/', (string) $number) === 1) {
+            return Ticket::lookup(array('number' => (string) $number)) ?: null;
+        }
+        return null;
     }
 
     /** Output-buffer callback: adds the script to a ticket view (full page or PJAX fragment). */
@@ -40,7 +54,7 @@ final class FeedbackUi
                 return $buffer;
             }
             $staff = $GLOBALS['thisstaff'] ?? null;
-            $ticket = Ticket::lookup((int) ($_GET['id'] ?? 0));
+            $ticket = self::viewedTicket();
             if (!$staff instanceof Staff || !$ticket || !$ticket->checkStaffPerm($staff)) {
                 return $buffer;
             }
