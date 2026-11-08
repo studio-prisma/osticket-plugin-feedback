@@ -37,7 +37,7 @@ Stop if: `SECRET_SALT` is missing or the sample value, or no cron runs.
 1. Unzip `feedback-<version>.zip` into `include/plugins/`. Afterwards `include/plugins/feedback/plugin.php` exists.
 2. Permissions as for the other plugins: readable by the web server, not writable.
 
-Check: `include/plugins/feedback/` holds `plugin.php`, `config.php`, `class.FeedbackPlugin.php`, `LICENSE` and `src/` with 12 files.
+Check: `include/plugins/feedback/` holds `plugin.php`, `config.php`, `class.FeedbackPlugin.php`, `LICENSE` and `src/` with 13 files.
 
 ---
 
@@ -51,6 +51,7 @@ Check: `include/plugins/feedback/` holds `plugin.php`, `config.php`, `class.Feed
    - "Closing statuses": closing with one of these never asks, e.g. "Duplicate" or "Spam". Preselected are closed statuses with "Duplicate", "Spam", "Rejected" or "Hinfällig" in their name.
    - "Help topics" and "Sender domains" as needed, e.g. partner domains that shouldn't be asked.
    - "Note at the ticket when asked": short (default), with the mail as sent, or none. With the mail, every agent who opens the ticket sees the customer's rating links.
+   - "Who decides": "Agents can switch the question off" (tick when closing, More menu) and "Closing without an agent form" for API, cron and mass changes in the ticket list. If tools such as an MCP server close tickets through the API, "only when requested" makes every such close an explicit decision (`feedback` field of API Endpoints 2.9.0).
    - Leave the texts empty for the built-in text. "Language of the built-in texts" decides between German (informal "du") and English; "Help desk language" follows the system language.
 5. Save.
 6. **Open the instance again and check the checkboxes.** osTicket 1.18 doesn't store checkbox defaults when an instance is created: after the first save "Comment field after the click", "Own domains" and "Footer with AI notice" can be off although they are on by default. Tick them again where wanted, Save, open once more and check they stay ticked.
@@ -96,6 +97,8 @@ Stop if: no mail arrives in step 3. Check first: is there a note "Satisfaction q
 | HTML in the comment | `<script>alert(1)</script>` as comment | the note shows ‹script›…‹/script› as text, nothing runs |
 | Many requests | more than 60 requests in 10 minutes from one IP | "Too many requests" (HTTP 429) |
 | Second close | reopen the ticket, close it again | no second question |
+| Switch off without token | `curl -X POST …/scp/ajax.php/feedback/ticket/<id>/decline` with a valid agent session cookie but no CSRF header | HTTP 400, nothing changes |
+| Switch off a foreign ticket | the same POST as an agent without access to the ticket | HTTP 403, nothing changes |
 
 ---
 

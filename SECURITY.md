@@ -30,6 +30,8 @@ Expected response: an acknowledgement within 7 days, an assessment within 30. Th
 - **Markup from a comment rendered** on the click page, in a thread note, in the agent mail, in the assignment alert or on the evaluation page.
 - **The token key or `SECRET_SALT`** in a response, a log line, an error message or the release package; a link that works while `SECRET_SALT` is the sample value.
 - **The IP address stored in clear text.**
+- **Switching the question off or on for a ticket** (`scp/ajax.php/feedback/ticket/<id>/decline|allow`) without an agent session, without osTicket's CSRF token, or for a ticket the agent can't access.
+- **`feedback_ask` widening the rules**: a request that makes the plugin ask a ticket the rules exclude (AI agent, department, status, domain, already asked).
 - **A redirect to an address outside the help desk** or a link built from the request's Host header.
 - **Bypassing the rate limit** with the same IP, or growing the plugin's tables without bound from outside.
 - **Asking twice for one ticket**, asking for a ticket an AI agent closed, a sub-ticket or an excluded department, help topic or domain.

@@ -37,7 +37,7 @@ Abbruch, wenn: `SECRET_SALT` fehlt oder der Beispielwert ist, oder kein Cron lä
 1. Das Paket `feedback-<version>.zip` nach `include/plugins/` entpacken. Danach gibt es `include/plugins/feedback/plugin.php`.
 2. Rechte wie bei den anderen Plugins: lesbar für den Webserver, nicht schreibbar.
 
-Prüfung: `include/plugins/feedback/` enthält `plugin.php`, `config.php`, `class.FeedbackPlugin.php`, `LICENSE` und `src/` mit 12 Dateien.
+Prüfung: `include/plugins/feedback/` enthält `plugin.php`, `config.php`, `class.FeedbackPlugin.php`, `LICENSE` und `src/` mit 13 Dateien.
 
 ---
 
@@ -51,6 +51,7 @@ Prüfung: `include/plugins/feedback/` enthält `plugin.php`, `config.php`, `clas
    - „Closing statuses“: Schließen mit einem dieser Status fragt nie, z. B. „Dublette“ oder „Spam“. Vorausgewählt sind geschlossene Status mit „Duplicate“, „Spam“, „Rejected“ oder „Hinfällig“ im Namen.
    - „Help topics“ und „Sender domains“ nach Bedarf, z. B. Domains von Partnern, die nicht gefragt werden sollen.
    - „Note at the ticket when asked“: kurz (Standard), mit der gesendeten Mail oder keine. Mit der Mail sieht jeder Agent, der das Ticket öffnet, die Bewertungslinks des Kunden.
+   - „Who decides“: „Agents can switch the question off“ (Häkchen beim Schließen, Menü „Weitere“) und „Closing without an agent form“ für API, Cron und Massen-Statuswechsel in der Ticketliste. Schließen Werkzeuge wie ein MCP-Server Tickets über die API, macht „only when requested“ jedes solche Schließen zu einer ausdrücklichen Entscheidung (Feld `feedback` von API Endpoints 2.9.0).
    - Texte leer lassen für den eingebauten Text (Du-Form). „Language of the built-in texts“ auf „Deutsch (du)“, wenn das Helpdesk nicht auf Deutsch steht.
 5. Speichern.
 6. **Instanz noch einmal öffnen und die Häkchen prüfen.** osTicket 1.18 speichert beim Anlegen einer Instanz die Standardwerte von Häkchen nicht: Nach dem ersten Speichern können „Comment field after the click“, „Own domains“ und „Footer with AI notice“ aus sein, obwohl sie standardmäßig an sind. Gewünschte Häkchen wieder setzen, Speichern, erneut öffnen und prüfen, dass sie bleiben.
@@ -96,6 +97,8 @@ Abbruch, wenn: bei Schritt 3 keine Mail kommt. Dann zuerst prüfen: Steht am Tic
 | Kommentar mit HTML | `<script>alert(1)</script>` als Kommentar | Notiz zeigt ‹script›…‹/script› als Text, nichts wird ausgeführt |
 | Viele Aufrufe | über 60 Aufrufe in 10 Minuten von einer IP | „Zu viele Anfragen“ (HTTP 429) |
 | Zweites Schließen | Ticket wieder öffnen, erneut schließen | keine zweite Frage |
+| Abschalten ohne Token | `curl -X POST …/scp/ajax.php/feedback/ticket/<id>/decline` mit gültigem Agenten-Cookie, ohne CSRF-Header | HTTP 400, nichts ändert sich |
+| Fremdes Ticket abschalten | derselbe POST als Agent ohne Zugriff auf das Ticket | HTTP 403, nichts ändert sich |
 
 ---
 

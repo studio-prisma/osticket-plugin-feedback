@@ -57,7 +57,8 @@ check('config: spec defaults (mail, thumbs, reopen, 14 days, comment on, own dom
     && $builtIn['bad_stars'] === 2 && $builtIn['bad_nps'] === 6);
 check('config: off until switched on', $builtIn['enabled'] === false);
 foreach (array('enabled', 'mode', 'scale', 'on_bad', 'bad_stars', 'bad_nps', 'valid_days', 'exclude_depts', 'exclude_topics',
-             'exclude_statuses', 'exclude_domains', 'exclude_own', 'comment_on', 'note_sent', 'language', 'subject', 'text',
+             'exclude_statuses', 'exclude_domains', 'exclude_own', 'comment_on', 'note_sent', 'agent_decline', 'no_session',
+             'language', 'subject', 'text',
              'question', 'line', 'foot_on', 'foot', 'accent') as $k) {
     check("config: field $k exists", isset($opts[$k]));
 }
@@ -210,6 +211,32 @@ check('sent note: full keeps the button words, drops the emojis (3-byte utf8)', 
 check('sent note: recipient escaped', strpos(FeedbackMail::sentNote($s, $de, '<b>x</b>', $exp, '', ''), '<b>') === false);
 check('beyond BMP: entities and literals removed, the rest kept', FeedbackMail::noBeyondBmp('a &#x1F44D; b &#128078; c 👍 d &#x2605; &amp;')
     === 'a b c d &#x2605; &amp;', FeedbackMail::noBeyondBmp('a &#x1F44D; b &#128078; c 👍 d &#x2605; &amp;'));
+check('sent note: names the source when known', strpos(FeedbackMail::sentNote($s, $de, 'k@x.example', $exp, '', '', 'api'),
+    'Ausgelöst durch: API oder Cron.') !== false && strpos($short, 'Ausgelöst') === false);
+
+// ----------------------------------------------------------- who decides (0.2)
+
+$d = FeedbackSettings::normalise(array());
+check('decide: defaults keep 0.1 behaviour', $d['agent_decline'] === true && $d['no_session'] === 'ask'
+    && FeedbackRules::decide($d, 'web', null) === 'ask' && FeedbackRules::decide($d, 'api', null) === 'ask'
+    && FeedbackRules::decide($d, 'mass', null) === 'ask');
+check('decide: web tick removed declines', FeedbackRules::decide($d, 'web', '0') === 'decline');
+check('decide: web tick on asks', FeedbackRules::decide($d, 'web', '1') === 'ask');
+$noDecline = FeedbackSettings::normalise(array('agent_decline' => '0'));
+check('decide: without agent_decline the tick is ignored', FeedbackRules::decide($noDecline, 'web', '0') === 'ask');
+$req = FeedbackSettings::normalise(array('no_session' => 'requested'));
+check('decide: "requested" skips API and mass without a flag', FeedbackRules::decide($req, 'api', null) === 'skip'
+    && FeedbackRules::decide($req, 'mass', null) === 'skip');
+check('decide: "requested" asks with feedback_ask=1, declines with 0', FeedbackRules::decide($req, 'api', '1') === 'ask'
+    && FeedbackRules::decide($req, 'api', '0') === 'decline');
+check('decide: "requested" does not touch web closes', FeedbackRules::decide($req, 'web', null) === 'ask');
+$never = FeedbackSettings::normalise(array('no_session' => 'never'));
+check('decide: "never" skips even when asked for', FeedbackRules::decide($never, 'api', '1') === 'skip'
+    && FeedbackRules::decide($never, 'api', '0') === 'decline');
+check('decide: unknown no_session falls back to ask', FeedbackSettings::normalise(array('no_session' => 'x'))['no_session'] === 'ask');
+check('decide: only "1" and "0" count as a flag', FeedbackRules::askValue('1') === '1' && FeedbackRules::askValue('0') === '0'
+    && FeedbackRules::askValue('yes') === null && FeedbackRules::askValue(array('1')) === null && FeedbackRules::askValue(null) === null);
+
 check('i18n: no 4-byte characters in the sent notes', preg_match('/[\x{10000}-\x{10FFFF}]/u',
     $de['note_sent_title'] . $de['note_sent'] . $de['note_mail'] . $de['note_failed']) === 0);
 

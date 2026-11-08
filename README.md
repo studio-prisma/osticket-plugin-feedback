@@ -25,6 +25,17 @@ Ratings stay in the help desk's own database. No survey service, no tracking pix
 - departments, help topics and sender domains from the settings; the help desk's own domains by default
 - closes with a status like "Duplicate" or "Spam" (setting, preselected by name)
 - tickets that were already asked
+- tickets an agent switched off: the tick "Send satisfaction question" removed when closing, or "No satisfaction question" in the ticket's More menu
+- depending on the setting, closes without an agent form (API, cron, mass status change in the ticket list)
+
+## Who decides
+
+| Close | Default | Setting |
+|---|---|---|
+| Agent closes one ticket (reply, note, status dialog) | asks; the agent can remove the tick, which means never for this ticket | "Agents can switch the question off" |
+| API, cron, mass status change in the list | asks, as in 0.1 | "Closing without an agent form": ask / only when the request asks for it / never |
+
+A request asks for it with `feedback_ask=1` in the POST data and declines with `feedback_ask=0`. The [API Endpoints](https://github.com/studio-prisma/osticket-api-endpoints) plugin (2.9.0 or later) passes its `feedback` field this way. The flag can only confirm or suppress a question the rules allow; it never widens them.
 
 ## Requirements
 
@@ -49,6 +60,8 @@ Step by step with checkpoints: **[docs/INSTALL.md](docs/INSTALL.md)**. Short ver
 | Link valid for | days (1–90) | 14 |
 | Comment field after the click | on / off | on |
 | Note at the ticket when asked | none / short / with the mail as sent | short; a failed send always gets a note |
+| Agents can switch the question off | on / off | on |
+| Closing without an agent form | ask / only when requested / never | ask |
 | Never ask for | departments, help topics, closing statuses, sender domains, own domains | departments named like "Alert"/"Protokoll", statuses named like "Duplicate"/"Spam"/"Hinfällig", own domains |
 | Texts | subject, mail text, question, line, AI notice; empty = built-in text | built-in, German (informal) or English |
 | Accent colour | `#rrggbb` | `#330066` |

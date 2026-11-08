@@ -60,6 +60,39 @@ final class FeedbackRules
         return '';
     }
 
+    /**
+     * Who decides about a close that the rules would ask for.
+     *
+     * $source: "web" (agent form on one ticket), "mass" (status change of
+     * selected tickets in the list) or "api" (no agent session: API, cron).
+     * $ask: the request's feedback_ask, "1", "0" or null when absent.
+     *
+     * @return string "ask", "decline" (never for this ticket, noted) or "skip" (not now, no trace)
+     */
+    public static function decide(array $s, string $source, ?string $ask): string
+    {
+        if ($source === 'web') {
+            return $ask === '0' && $s['agent_decline'] ? 'decline' : 'ask';
+        }
+        if ($ask === '0') {
+            return 'decline';
+        }
+        switch ($s['no_session']) {
+            case FeedbackSettings::SESSION_NEVER:
+                return 'skip';
+            case FeedbackSettings::SESSION_REQUESTED:
+                return $ask === '1' ? 'ask' : 'skip';
+            default:
+                return 'ask';
+        }
+    }
+
+    /** "1", "0" or null from a raw request value. */
+    public static function askValue($raw): ?string
+    {
+        return $raw === '1' || $raw === '0' ? $raw : null;
+    }
+
     public static function domain(string $email): string
     {
         $at = strrpos($email, '@');

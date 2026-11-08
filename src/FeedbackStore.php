@@ -101,6 +101,30 @@ final class FeedbackStore
         return (bool) db_result(db_query(sprintf("SELECT COUNT(*) FROM `%s` WHERE ticket_id=%d", self::table(), $ticketId)));
     }
 
+    /** The ticket's row state ("pending", "sent", "declined", …) or "" when it has none. */
+    public static function stateOf(int $ticketId): string
+    {
+        self::ensure();
+        return (string) db_result(db_query(sprintf("SELECT state FROM `%s` WHERE ticket_id=%d", self::table(), $ticketId)));
+    }
+
+    /** Never ask this ticket. False when it already has a row (asked, queued or declined). */
+    public static function decline(int $ticketId, string $scale, int $staffId): bool
+    {
+        self::ensure();
+        db_query(sprintf("INSERT IGNORE INTO `%s` (ticket_id, mode, scale, state, closer_id, created) VALUES (%d, 'mail', %s, 'declined', %d, %d)",
+            self::table(), $ticketId, db_input($scale), $staffId, time()));
+        return db_affected_rows() === 1;
+    }
+
+    /** Undoes decline(). False when the ticket wasn't declined (asking can't be undone). */
+    public static function allow(int $ticketId): bool
+    {
+        self::ensure();
+        db_query(sprintf("DELETE FROM `%s` WHERE ticket_id=%d AND state='declined'", self::table(), $ticketId));
+        return db_affected_rows() === 1;
+    }
+
     /** @return int[] IDs of queued mail requests */
     public static function pending(int $limit = 50): array
     {

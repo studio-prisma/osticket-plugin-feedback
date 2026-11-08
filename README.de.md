@@ -25,6 +25,17 @@ Die Bewertungen bleiben in der Datenbank des Helpdesks. Kein Umfragedienst, kein
 - Abteilungen, Hilfethemen und Absender-Domains aus den Einstellungen; standardmäßig die eigenen Domains des Helpdesks
 - Schließen mit einem Status wie „Dublette“ oder „Spam“ (Einstellung, nach Namen vorausgewählt)
 - Tickets, zu denen schon gefragt wurde
+- Tickets, bei denen ein Agent die Frage abgeschaltet hat: Häkchen „Send satisfaction question“ beim Schließen entfernt oder „Keine Zufriedenheitsfrage“ im Menü „Weitere“
+- je nach Einstellung: Schließen ohne Agentenformular (API, Cron, Massen-Statuswechsel in der Ticketliste)
+
+## Wer entscheidet
+
+| Schließen | Standard | Einstellung |
+|---|---|---|
+| Agent schließt ein Ticket (Antwort, Notiz, Statusdialog) | fragt; der Agent kann das Häkchen entfernen, dann nie für dieses Ticket | „Agents can switch the question off“ |
+| API, Cron, Massen-Statuswechsel in der Liste | fragt, wie in 0.1 | „Closing without an agent form“: fragen / nur wenn angefordert / nie |
+
+Ein Request fordert die Frage mit `feedback_ask=1` in den POST-Daten an und lehnt sie mit `feedback_ask=0` ab. Das Plugin [API Endpoints](https://github.com/studio-prisma/osticket-api-endpoints) (ab 2.9.0) reicht sein Feld `feedback` so weiter. Der Schalter kann eine Frage nur bestätigen oder unterdrücken, die die Regeln erlauben; er erweitert sie nie.
 
 ## Voraussetzungen
 
@@ -49,6 +60,8 @@ Schritt für Schritt mit Prüfpunkten: **[docs/INSTALL.de.md](docs/INSTALL.de.md
 | Link valid for | Tage (1–90) | 14 |
 | Comment field after the click | an / aus | an |
 | Note at the ticket when asked | keine / kurz / mit der gesendeten Mail | kurz; ein gescheiterter Versand bekommt immer eine Notiz |
+| Agents can switch the question off | an / aus | an |
+| Closing without an agent form | fragen / nur wenn angefordert / nie | fragen |
 | Never ask for | Abteilungen, Hilfethemen, Status beim Schließen, Absender-Domains, eigene Domains | Abteilungen mit „Alert“/„Protokoll“ im Namen, Status mit „Duplicate“/„Spam“/„Hinfällig“ im Namen, eigene Domains |
 | Texte | Betreff, Mailtext, Frage, Zeile, KI-Hinweis; leer = eingebauter Text | eingebaut, Deutsch (du) oder Englisch |
 | Accent colour | `#rrggbb` | `#330066` |

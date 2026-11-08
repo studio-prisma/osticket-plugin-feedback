@@ -143,10 +143,14 @@ final class FeedbackMail
      * @param array<string,mixed>  $s FeedbackSettings::get()
      * @param array<string,string> $t FeedbackI18n::strings()
      */
-    public static function sentNote(array $s, array $t, string $to, int $expires, string $subject, string $body): string
+    public static function sentNote(array $s, array $t, string $to, int $expires, string $subject, string $body,
+        string $source = ''): string
     {
         $scale = $t['scale_' . $s['scale']] ?? $s['scale'];
         $html = self::e(sprintf($t['note_sent'], $to, $scale, date($t['date_format'], $expires)));
+        if (isset($t['source_' . $source])) {
+            $html .= ' ' . self::e(sprintf($t['note_source'], $t['source_' . $source]));
+        }
         if ($s['note_sent'] === FeedbackSettings::NOTE_FULL) {
             $html .= '<br><br>' . self::e(sprintf($t['note_mail'], $subject)) . '<hr>' . self::noBeyondBmp($body);
         }

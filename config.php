@@ -101,6 +101,31 @@ class FeedbackConfig extends PluginConfig
                            . 'opens the ticket sees the customer\'s rating links.',
             )),
 
+            'sec_decide' => new SectionBreakField(array(
+                'label' => 'Who decides',
+            )),
+
+            'agent_decline' => new BooleanField(array(
+                'label'         => 'Agents can switch the question off',
+                'default'       => true,
+                'configuration' => array(
+                    'desc' => 'A tick "Send satisfaction question" when closing in the agent panel, and '
+                            . '"No satisfaction question" in the ticket\'s More menu. Off for a ticket means never.',
+                ),
+            )),
+
+            'no_session' => new ChoiceField(array(
+                'label'   => 'Closing without an agent form',
+                'default' => 'ask',
+                'choices' => array(
+                    'ask'       => 'Ask (as in 0.1)',
+                    'requested' => 'Ask only when the request asks for it (feedback_ask=1)',
+                    'never'     => 'Never ask',
+                ),
+                'hint'    => 'API, cron and mass status changes in the ticket list. The API Endpoints plugin passes '
+                           . '"feedback": true/false as feedback_ask.',
+            )),
+
             'sec_except' => new SectionBreakField(array(
                 'label' => 'Never ask for',
             )),
